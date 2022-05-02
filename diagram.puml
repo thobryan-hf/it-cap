@@ -1,0 +1,36 @@
+@startuml
+title It Cap Script
+
+start
+:Fetch all epics that belong to the project;
+  while (Were all the epics analysed?) is (No)
+    while (Is the Epic capitalizable?) is (Yes)
+      :Fetch all issues that belong to the epic;
+      if (Is issue status = resolved between the first and last day of last month? )  then (Yes)
+        if (Is issue type != [Bug, Story, Epic]) then (No)
+
+        else (Yes)
+        :Keep who the issue was assigned and the time spent;
+          if (Is Pairee Field set?) then (Yes)
+            :Keep the pairee name and consider the same time
+            spent as the time was reported;
+          else (No)
+          endif;
+
+      :Add in the Report the name of people that developed
+      the issues that belong to the epic and the time spent in days;
+
+        endif;
+      else (No)
+      endif;
+
+    endwhile (No)
+
+  endwhile (Yes)
+  :Validate if the total days spent is equal or less than the
+  number of working days in Germany in this specific month;
+
+  :Save CSV Report;
+
+stop
+@enduml
