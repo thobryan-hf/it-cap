@@ -22,8 +22,8 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 # projects = ["PX", "REF", "PO"]
 projects = ["MGT"]
 
-start_date = "2022-04-01"
-end_date = "2022-04-30"
+start_date = "2022-05-01"
+end_date = "2022-05-31"
 output = "csv"  # csv or screen
 
 #  Jira Authentication
@@ -98,6 +98,7 @@ def get_task_info(issue_task):
 
     return task_dict
 
+
 def time_calculation_person_pairee(pair, task_person_dict, issue_task):
     """
     Add or update a specific number of time spent for a pair in a project
@@ -114,6 +115,7 @@ def time_calculation_person_pairee(pair, task_person_dict, issue_task):
         task_person_dict[task_assignee] = task_time
 
     return task_person_dict
+
 
 def time_calculation_person(task_person_dict, issue_task):
     """
@@ -224,6 +226,8 @@ def generate_report(projects):
 
     projects_analyzed = 0
 
+    audit_table = PrettyTable()
+
     for board in projects:
         projects_analyzed += 1
 
@@ -261,12 +265,15 @@ def generate_report(projects):
                 if task_info[issue_task]["task_issuetype"] not in ["Epic", "Story", "Bug"]:
                     task_person_dict = time_calculation_person(task_person_dict, issue_task)
                     epics_changed_in_period.append(issue_epic.key)
+                    audit_table.add_row([key, issue_task, task_info[issue_task]["task_assignee"], task_info[issue_task]["task_time"]/28800, task_info[issue_task]["task_resolutiondate"]])
+
                     if pairee:
                         task_person_dict = time_calculation_person_pairee(pairee, task_person_dict, issue_task)
-                        # epics_changed_in_period.append(issue_epic.key)
+                        audit_table.add_row([key, issue_task, pairee,
+                                             task_info[issue_task]["task_time"] / 28800, task_info[issue_task]["task_resolutiondate"]])
 
                     logging.info(f'{issue_task} - Assigned: {task_info[issue_task]["task_assignee"]} - '
-                                 f'Time: {task_info[issue_task]["task_time"]} - '
+                                 f'Time: {task_info[issue_task]["task_time"]}s ({task_info[issue_task]["task_time"]/28800} days) - '
                                  f'Resolution: {task_info[issue_task]["task_resolutiondate"]} - '
                                  f'IssueType: {task_info[issue_task]["task_issuetype"]}')
 
@@ -310,6 +317,10 @@ def generate_report(projects):
 
         validate_working_days(board, start_date, end_date, report_dict)
 
+        # Audit
+        audit_table.field_names = ["Epic", "Issue", "Assigned", "Days", "Resolved"]
+        print(f"\n{audit_table}")
+
 
 if __name__ == '__main__':
 
@@ -335,3 +346,4 @@ if __name__ == '__main__':
         f.close()
     elif output == "screen":
         print(f"\n{epic_table}")
+
