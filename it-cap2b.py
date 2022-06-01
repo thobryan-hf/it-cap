@@ -5,6 +5,8 @@ Please, change generate your token in Jira and change the variables below """
 
 import os
 from typing import Dict, Any
+from datetime import date, timedelta
+
 
 from jira import JIRA  # https://buildmedia.readthedocs.org/media/pdf/jira/latest/jira.pdf
 from prettytable import PrettyTable
@@ -22,8 +24,9 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 # projects = ["PX", "REF", "PO"]
 projects = ["MGT"]
 
-start_date = "2022-05-01"
-end_date = "2022-05-31"
+start_date = "2022-05-01"  # First day of previous month
+end_date = "2022-06-01"    # Last day of previous month + 1 -> otherwise Jira won't consider tasks resolved in the last day
+
 output = "csv"  # csv or screen
 
 #  Jira Authentication
@@ -256,7 +259,7 @@ def generate_report(projects):
             for issue_task in jira.search_issues(
                     f'PROJECT IN ("{board}") AND ("EPIC LINK" = "{issue_epic.key}" OR parentEpic = "{issue_epic.key}") AND '
                     f'resolved >= "{start_date}" '
-                    f'AND resolved < "{end_date}"'):
+                    f'AND resolved <= "{end_date}"'):
 
                 task_info = get_task_info(issue_task)
                 pairee = get_task_info_pairee(issue_task)
