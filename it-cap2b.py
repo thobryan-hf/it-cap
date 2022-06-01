@@ -44,12 +44,7 @@ def get_projects():
         if hasattr(project, "projectCategory") and "HelloFresh - Test Projects" not in project.projectCategory.name:
             projects_acceptable.append(project.key)
 
-    # for p in sorted(projects_acceptable):
-    #     print(p)
-    # print(len(projects_acceptable))
     return projects_acceptable
-#     exit()
-# get_projects()
 
 def period_working_days(start_date, end_date):
     """
@@ -243,9 +238,6 @@ def generate_report(projects):
         project_dict = {'project_lead': None}
 
         # Only epics that are capitalizable
-        # 'PROJECT IN ({}) AND ISSUETYPE = "Epic" AND "Is Capitalizable?" = "Yes" AND (category != "HelloFresh - Test Projects" OR category is EMPTY) AND (resolution is EMPTY OR resolution != Unresolved or resolution != "Won\'t Do")'.format(
-        #     board)):
-
         for issue_epic in jira.search_issues(
                 f'PROJECT IN ("{board}") AND ISSUETYPE = "Epic" AND "Is Capitalizable?" = "Yes"'):
             task_person_dict = {}
@@ -310,11 +302,6 @@ def generate_report(projects):
             # Delete epic that was not changed in that specific period of time
             if key not in epics_changed_in_period:
                 epic_dict.pop(key)
-            
-            # if total_working_days > 0:
-            #     epic_dict[key].update({"total_days": total_working_days})
-            # else:
-            #     epic_dict.pop(key)
 
         add_row_report(epic_dict, output)
 
@@ -343,7 +330,6 @@ if __name__ == '__main__':
 
     generate_report(projects)
 
-    # close file or print the report
     if output == "csv":
         print(f"\nFile {csv_file} was created")
         f.close()
