@@ -4,10 +4,6 @@
 Please, change generate your token in Jira and change the variables below """
 
 import os
-from typing import Dict, Any
-from datetime import date, timedelta
-
-
 from jira import JIRA  # https://buildmedia.readthedocs.org/media/pdf/jira/latest/jira.pdf
 from prettytable import PrettyTable
 from workalendar.europe import Germany
