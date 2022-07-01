@@ -20,8 +20,8 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 # projects = ["PX", "REF", "PO"]
 projects = ["MGT"]
 
-start_date = "2022-05-01"  # First day of previous month
-end_date = "2022-06-01"    # Last day of previous month + 1 -> otherwise Jira won't consider tasks resolved in the last day
+start_date = "2022-06-01"  # First day of previous month
+end_date = "2022-07-01"    # Last day of previous month + 1 -> otherwise Jira won't consider tasks resolved in the last day
 
 output = "csv"  # csv or screen
 
@@ -253,10 +253,19 @@ def generate_report(projects):
                 pairee = get_task_info_pairee(issue_task)
 
                 # Epic, story and bug must be ignored in this analyze
-                if task_info[issue_task]["task_issuetype"] not in ["Epic", "Story", "Bug"]:
+                if task_info[issue_task]["task_issuetype"] not in ["Epic", "Story", "Bug"] and \
+                        task_info[issue_task]['task_time'] != None:
                     task_person_dict = time_calculation_person(task_person_dict, issue_task)
                     epics_changed_in_period.append(issue_epic.key)
-                    audit_table.add_row([key, issue_task, task_info[issue_task]["task_assignee"], task_info[issue_task]["task_time"]/28800, task_info[issue_task]["task_resolutiondate"]])
+                    try:
+                        audit_table.add_row([key, issue_task, task_info[issue_task]["task_assignee"], task_info[issue_task]["task_time"]/28800, task_info[issue_task]["task_resolutiondate"]])
+                    except Exception as e:
+                        logging.info(e)
+                        logging.info("Error:")
+                        logging.info(f"Task: {issue_task}")
+                        logging.info(f"Task Time: {task_info[issue_task]['task_time']}")
+
+
 
                     if pairee:
                         task_person_dict = time_calculation_person_pairee(pairee, task_person_dict, issue_task)
