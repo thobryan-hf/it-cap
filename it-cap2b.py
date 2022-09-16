@@ -10,6 +10,7 @@ from workalendar.europe import Germany
 from datetime import datetime
 import csv
 import logging
+import sqlite3
 
 token = os.environ.get('jira_token')
 email = "thomas.bryan@hellofresh.com"
@@ -18,10 +19,10 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # projects = [] # Leave empty for all projects
 # projects = ["PX", "REF", "PO"]
-projects = ["MGT"]
+projects = ["MCPRO"]
 
-start_date = "2022-06-01"  # First day of previous month
-end_date = "2022-07-01"    # Last day of previous month + 1 -> otherwise Jira won't consider tasks resolved in the last day
+start_date = "2022-08-01"  # First day of previous month
+end_date = "2022-09-01"    # Last day of previous month + 1 -> otherwise Jira won't consider tasks resolved in the last day
 
 output = "csv"  # csv or screen
 
@@ -30,6 +31,17 @@ jira = JIRA(
     basic_auth=(email, token),
     server=server
 )
+
+db_file_name = "itcap.db"
+if os.path.exists(db_file_name):
+    os.remove(db_file_name)
+
+# SQLITE
+con = sqlite3.connect(db_file_name)
+cur = con.cursor()
+# select epic,  task_assignee , sum(task_time) from itcap group by epic, task_assignee order by epic
+
+cur.execute("CREATE TABLE itcap(epic, task, epic_summary, task_summary, task_assignee, task_time, task_resolutiondate, pairee)")
 
 
 def get_projects():
@@ -41,6 +53,7 @@ def get_projects():
             projects_acceptable.append(project.key)
 
     return projects_acceptable
+
 
 def period_working_days(start_date, end_date):
     """
@@ -64,6 +77,7 @@ def get_project_lead(key):
     project = jira.project(key)
     return project.lead.displayName
 
+
 def get_task_info_pairee(issue_task):
     # customfield_12162 -> Pairee field
     try:
@@ -72,6 +86,7 @@ def get_task_info_pairee(issue_task):
         return pair
     except:
         return False
+
 
 def get_task_info(issue_task):
     """
@@ -257,87 +272,112 @@ def generate_report(projects):
                         task_info[issue_task]['task_time'] != None:
                     task_person_dict = time_calculation_person(task_person_dict, issue_task)
                     epics_changed_in_period.append(issue_epic.key)
-                    try:
-                        audit_table.add_row([key, issue_task, task_info[issue_task]["task_assignee"], task_info[issue_task]["task_time"]/28800, task_info[issue_task]["task_resolutiondate"]])
-                    except Exception as e:
-                        logging.info(e)
-                        logging.info("Error:")
-                        logging.info(f"Task: {issue_task}")
-                        logging.info(f"Task Time: {task_info[issue_task]['task_time']}")
-
-
+                    # try:
+                    #     audit_table.add_row([key, issue_task, task_info[issue_task]["task_assignee"], task_info[issue_task]["task_time"]/28800, task_info[issue_task]["task_resolutiondate"]])
+                    # except Exception as e:
+                    #     logging.info(e)
+                    #     logging.info("Error:")
+                    #     logging.info(f"Task: {issue_task}")
+                    #     logging.info(f"Task Time: {task_info[issue_task]['task_time']}")
 
                     if pairee:
-                        task_person_dict = time_calculation_person_pairee(pairee, task_person_dict, issue_task)
-                        audit_table.add_row([key, issue_task, pairee,
-                                             task_info[issue_task]["task_time"] / 28800, task_info[issue_task]["task_resolutiondate"]])
+                        # task_person_dict = time_calculation_person_pairee(pairee, task_person_dict, issue_task)
+                        # audit_table.add_row([key, issue_task, pairee,
+                        #                      task_info[issue_task]["task_time"] / 28800, task_info[issue_task]["task_resolutiondate"]])
+                        cur.execute(
+                            "INSERT INTO itcap (epic, task, epic_summary, task_summary, task_assignee, task_time, task_resolutiondate, pairee) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                            (
+                                str(issue_epic.key),
+                                str(issue_task),
+                                str(issue_epic.fields.summary),
+                                str(task_info[issue_task]["task_summary"]),
+                                str(pairee),
+                                str(task_info[issue_task]["task_time"] / 28800),
+                                str(task_info[issue_task]["task_resolutiondate"]),
+                                1
+                            )
+                            )
 
                     logging.info(f'{issue_task} - Assigned: {task_info[issue_task]["task_assignee"]} - '
                                  f'Time: {task_info[issue_task]["task_time"]}s ({task_info[issue_task]["task_time"]/28800} days) - '
                                  f'Resolution: {task_info[issue_task]["task_resolutiondate"]} - '
                                  f'IssueType: {task_info[issue_task]["task_issuetype"]}')
 
+                    cur.execute("INSERT INTO itcap (epic, task, epic_summary, task_summary, task_assignee, task_time, task_resolutiondate, pairee) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                            (
+                                str(issue_epic.key),
+                                str(issue_task),
+                                str(issue_epic.fields.summary),
+                                str(task_info[issue_task]["task_summary"]),
+                                str(task_info[issue_task]["task_assignee"]),
+                                str(task_info[issue_task]["task_time"]/28800),
+                                str(task_info[issue_task]["task_resolutiondate"]),
+                                0
+                            )
+                        )
+                    con.commit()
+
             total_working_days = 0
 
             # Prepare report - people that worked in the epic and calculate the total working days spent
-            for i, person in enumerate(task_person_dict):
-                seconds = task_person_dict[person]
-                if seconds and seconds != 0 and isinstance(seconds, int):
-                    working_days = seconds / 28800  # 8 hours = 1 working day
-                else:
-                    if not isinstance(seconds, int):
-                        logging.info(f"[WARNING] {person} {seconds}")
-                        logging.info("[WARNING] Seconds is not an integer")
-                    working_days = 0
-                total_working_days += working_days
-
-                epic_dict[key].update({"person_{}".format(i + 1): person})
-
-                report_dict['total_working_report'] += working_days
-                if person not in report_dict['persons']:
-                    report_dict['persons'].append(person)
+            # for i, person in enumerate(task_person_dict):
+            #     seconds = task_person_dict[person]
+            #     if seconds and seconds != 0 and isinstance(seconds, int):
+            #         working_days = seconds / 28800  # 8 hours = 1 working day
+            #     else:
+            #         if not isinstance(seconds, int):
+            #             logging.info(f"[WARNING] {person} {seconds}")
+            #             logging.info("[WARNING] Seconds is not an integer")
+            #         working_days = 0
+            #     total_working_days += working_days
+            #
+            #     epic_dict[key].update({"person_{}".format(i + 1): person})
+            #
+            #     report_dict['total_working_report'] += working_days
+            #     if person not in report_dict['persons']:
+            #         report_dict['persons'].append(person)
 
             # Fill empty spots in the report (person column)
-            if len(task_person_dict) < 7:
-                for i in range(len(task_person_dict), 7):
-                    epic_dict[key].update({"person_{}".format(i + 1): "-"})
+            # if len(task_person_dict) < 7:
+            #     for i in range(len(task_person_dict), 7):
+            #         epic_dict[key].update({"person_{}".format(i + 1): "-"})
 
             # Add total working days in the dictionary or delete epic from the report
-            epic_dict[key].update({"total_days": total_working_days}) # REMOVER
+            # epic_dict[key].update({"total_days": total_working_days}) # REMOVER
             # Delete epic that was not changed in that specific period of time
             if key not in epics_changed_in_period:
                 epic_dict.pop(key)
 
-        add_row_report(epic_dict, output)
+        # add_row_report(epic_dict, output)
 
-        validate_working_days(board, start_date, end_date, report_dict)
+        # validate_working_days(board, start_date, end_date, report_dict)
 
         # Audit
-        audit_table.field_names = ["Epic", "Issue", "Assigned", "Days", "Resolved"]
-        print(f"\n{audit_table}")
+        # audit_table.field_names = ["Epic", "Issue", "Assigned", "Days", "Resolved"]
+        # print(f"\n{audit_table}")
 
 
 if __name__ == '__main__':
 
-    header = ["Issue Type", "Key", "Summary", "Reporter", "Status", "Created", "Updated", "Resolved",
-              'Future Economic Benefit', "Project Name", "Project Lead", "Category", "Team Member 1", "Team Member 2",
-              "Team Member 3", "Team Member 4", "Team Member 5", "Team Member 6", "Team Member 7", "Total Days"]
+    # header = ["Issue Type", "Key", "Summary", "Reporter", "Status", "Created", "Updated", "Resolved",
+    #           'Future Economic Benefit', "Project Name", "Project Lead", "Category", "Team Member 1", "Team Member 2",
+    #           "Team Member 3", "Team Member 4", "Team Member 5", "Team Member 6", "Team Member 7", "Total Days"]
 
-    if output == "csv":
-        csv_file = 'it-cap.csv'
-        f = open(csv_file, 'w')
-        writer = csv.writer(f, dialect='excel')
-        writer.writerow(header)
-
-    elif output == "screen":
-        epic_table = PrettyTable()
-        epic_table.field_names = header
+    # if output == "csv":
+    #     csv_file = 'it-cap.csv'
+    #     f = open(csv_file, 'w')
+    #     writer = csv.writer(f, dialect='excel')
+    #     writer.writerow(header)
+    #
+    # elif output == "screen":
+    #     epic_table = PrettyTable()
+    #     epic_table.field_names = header
 
     generate_report(projects)
 
-    if output == "csv":
-        print(f"\nFile {csv_file} was created")
-        f.close()
-    elif output == "screen":
-        print(f"\n{epic_table}")
+    # if output == "csv":
+    #     print(f"\nFile {csv_file} was created")
+    #     f.close()
+    # elif output == "screen":
+    #     print(f"\n{epic_table}")
 
