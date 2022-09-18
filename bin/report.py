@@ -2,11 +2,11 @@ import argparse
 
 from dependency_injector.wiring import Provide, inject
 from src.containers import Container
-from src.clients import JiraClient
+from src.managers import ReportManager
 
 @inject
-def main(project_key: str, period: str, output_format: str, jira_client: JiraClient = Provide[Container.jira_client]) -> None:
-    jira_client.test()
+def main(project_key: str, period: str, output_format: str, report_manager: ReportManager = Provide[Container.report_manager]) -> None:
+    report_manager.get_report()
 
 def run() -> None:
     parser = argparse.ArgumentParser(description='HelloFresh IT Cap Script')
