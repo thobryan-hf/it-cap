@@ -44,5 +44,7 @@ class ProjectCrawler:
             )
             tasks.extend(task)
 
+        # TODO this class might be outside the crawler
         grouped_tasks = self.group_tasks_by_assignee(tasks=tasks)
+        # TODO: Need to finalise the total per epic/assignee
         pass
