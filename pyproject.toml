@@ -11,6 +11,7 @@ workalendar = "^16.3.0"
 prettytable = "^3.2.0"
 dependency-injector = {version = "^4.40.0", extras = ["yaml"]}
 logstash_formatter = "^0.5.17"
+pendulum = "^2.1.2"
 
 [tool.poetry.dev-dependencies]
 

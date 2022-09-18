@@ -1,10 +1,13 @@
+import argparse
+import pendulum
 import functools
-import logging
+import re
 
 from typing import Dict, Type
 import logging
 
 from logstash_formatter import LogstashFormatterV1
+
 
 class CustomLogger:
     def __init__(self, cls: Type, config: Dict[str, str]) -> None:
@@ -49,3 +52,17 @@ class CustomLogger:
 
     def __call__(self) -> logging.Logger:
         return self._logger
+
+
+class ParseUtils:
+    @staticmethod
+    def parse_dates(arg_value: str, regex=re.compile(r"^(\d{2})\/(\d{4})$")):
+        result = regex.match(arg_value)
+        if result:
+            month = int(result.group(1))
+            year = int(result.group(2))
+            start_date = pendulum.date(year=year, month=month, day=1)
+            end_date = start_date + pendulum.duration(months=1)
+            return start_date, end_date
+        else:
+            raise argparse.ArgumentTypeError("Invalid Period")

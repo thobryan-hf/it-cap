@@ -1,9 +1,13 @@
-import imp
-from src.clients import JiraClient
+import datetime
+from typing import Tuple
+from src.crawlers import ProjectCrawler
+
 
 class ReportManager:
-    def __init__(self, jira_client: JiraClient) -> None:
-        self.jira_client = jira_client
+    def __init__(self, project_crawler: ProjectCrawler) -> None:
+        self._project_crawler = project_crawler
 
-    def get_report(self) -> None:
-        self.jira_client.test()
+    def get_report(self, project_key: str, start_date: datetime.date, end_date: datetime.date) -> None:
+        report = self._project_crawler.crawl_report(project_key=project_key, start_date=start_date, end_date=end_date)
+        if report:
+            print('REPORT')

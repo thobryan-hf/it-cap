@@ -1,6 +1,6 @@
 [[package]]
 name = "certifi"
-version = "2022.6.15.1"
+version = "2022.9.14"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = false
@@ -61,7 +61,7 @@ yaml = ["pyyaml"]
 
 [[package]]
 name = "idna"
-version = "3.3"
+version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
 category = "main"
 optional = false
@@ -131,6 +131,18 @@ python-versions = ">=3.6"
 pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 
 [[package]]
+name = "pendulum"
+version = "2.1.2"
+description = "Python datetimes made easy"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[package.dependencies]
+python-dateutil = ">=2.6,<3.0"
+pytzdata = ">=2020.1"
+
+[[package]]
 name = "prettytable"
 version = "3.4.1"
 description = "A simple Python library for easily displaying tabular data in a visually appealing ASCII table format"
@@ -181,6 +193,14 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 
 [package.dependencies]
 six = ">=1.5"
+
+[[package]]
+name = "pytzdata"
+version = "2020.1"
+description = "The Olson timezone database for Python."
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pyyaml"
@@ -281,7 +301,7 @@ python-versions = "*"
 
 [[package]]
 name = "workalendar"
-version = "16.3.0"
+version = "16.4.0"
 description = "Worldwide holidays and working days helper and toolkit."
 category = "main"
 optional = false
@@ -300,7 +320,7 @@ astronomy = ["skyfield", "skyfield-data"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "ed9a00de2697ba17dd62babf971b7aac29f22b38c18067046cf7d3144f37ede7"
+content-hash = "f2daf4d5b44cdfee4531a46d9922b6f7df35888d2be4d69d8c4fbffd5653e693"
 
 [metadata.files]
 certifi = []
@@ -314,11 +334,13 @@ logstash-formatter = []
 lunardate = []
 oauthlib = []
 packaging = []
+pendulum = []
 prettytable = []
 pyluach = []
 pymeeus = []
 pyparsing = []
 python-dateutil = []
+pytzdata = []
 pyyaml = []
 requests = []
 requests-oauthlib = []
