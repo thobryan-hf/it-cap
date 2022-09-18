@@ -64,7 +64,7 @@ class JiraClient(JIRA):
         return JiraTask(
             key=issue.key,
             issue_type=issue.fields.issuetype.name,
-            time_spent=issue.fields.aggregatetimespent,
+            time_spent=issue.fields.aggregatetimespent,  # TODO Add calculation using Story Points too
             assignee=str(issue.fields.assignee),
             updated=pendulum.parse(issue.fields.updated),
             resolved=pendulum.parse(issue.fields.resolutiondate) if issue.fields.resolutiondate else None,
