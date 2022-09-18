@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "it-cap"
+name = "it_cap"
 version = "0.1.0"
 description = "HF IT Capitalisation from Jira"
-authors = ["Omar Contreras <oc@hellofresh.com>"]
+authors = ["Thomas Bryan <thomas.bryan@hellofresh.com>", "Omar Contreras <oc@hellofresh.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -17,3 +17,6 @@ logstash_formatter = "^0.5.17"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+it-cap = "it_cap.report:main"

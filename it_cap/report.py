@@ -317,11 +317,10 @@ def generate_report(projects):
         print(f"\n{audit_table}")
 
 
-if __name__ == '__main__':
-
+def main():
     header = ["Issue Type", "Key", "Summary", "Reporter", "Status", "Created", "Updated", "Resolved",
-              'Future Economic Benefit', "Project Name", "Project Lead", "Category", "Team Member 1", "Team Member 2",
-              "Team Member 3", "Team Member 4", "Team Member 5", "Team Member 6", "Team Member 7", "Total Days"]
+            'Future Economic Benefit', "Project Name", "Project Lead", "Category", "Team Member 1", "Team Member 2",
+            "Team Member 3", "Team Member 4", "Team Member 5", "Team Member 6", "Team Member 7", "Total Days"]
 
     if output == "csv":
         csv_file = 'it-cap.csv'
@@ -341,3 +340,6 @@ if __name__ == '__main__':
     elif output == "screen":
         print(f"\n{epic_table}")
 
+
+if __name__ == '__main__':
+    main()
