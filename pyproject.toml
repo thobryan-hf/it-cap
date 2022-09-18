@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "it_cap"
+name = "src"
 version = "0.1.0"
 description = "HF IT Capitalisation from Jira"
 authors = ["Thomas Bryan <thomas.bryan@hellofresh.com>", "Omar Contreras <oc@hellofresh.com>"]
@@ -19,4 +19,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-it-cap = "it_cap.report:main"
+it-cap = "bin.report:run"

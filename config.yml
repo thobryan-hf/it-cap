@@ -1,0 +1,4 @@
+jira:
+  token: "${JIRA_TOKEN}"
+  server: "${JIRA_SERVER:https://hellofresh.atlassian.net}"
+  
