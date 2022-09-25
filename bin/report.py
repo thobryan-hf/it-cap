@@ -13,7 +13,10 @@ def main(project_key: str,
          end_date: datetime.date,
          output_format: str,
          report_manager: ReportManager = Provide[Container.report_manager]) -> None:
-    report_manager.get_report(project_key=project_key, start_date=start_date, end_date=end_date)
+    report_manager.get_report(project_key=project_key,
+                              start_date=start_date,
+                              end_date=end_date,
+                              output_format=output_format)
 
 
 def run() -> None:
@@ -29,6 +32,7 @@ def run() -> None:
                         help='Month and year to calculate IT Cap. eg 09/2022')
     parser.add_argument('--output',
                         required=False,
+                        type=str.lower,
                         dest='output_format',
                         default='screen',
                         choices=['screen', 'csv'])
