@@ -3,6 +3,7 @@ from dependency_injector import containers, providers
 
 from src.clients import JiraClient
 from src.managers import ReportManager
+from src.handlers import ScreenOutputHandler, CSVOutputHandler
 from src.crawlers import ProjectCrawler
 from src.utils import CustomLogger
  
@@ -23,7 +24,20 @@ class Container(containers.DeclarativeContainer):
         logger=logger.provided.call(ProjectCrawler)
     )
 
+    screen_output_handler_factory = providers.Factory(
+        ScreenOutputHandler,
+        logger=logger.provided.call(ScreenOutputHandler)
+    ).delegate()
+
+    csv_output_handler_factory = providers.Factory(
+        CSVOutputHandler,
+        logger=logger.provided.call(CSVOutputHandler)
+    ).delegate()
+
     report_manager = providers.Singleton(
         ReportManager,
-        project_crawler=project_crawler
+        project_crawler=project_crawler,
+        screen_output_handler_factory=screen_output_handler_factory,
+        csv_output_handler_factory=csv_output_handler_factory,
+        logger=logger.provided.call(ReportManager)
     )

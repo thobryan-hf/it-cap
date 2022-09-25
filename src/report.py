@@ -67,8 +67,8 @@ def get_project_lead(key):
 def get_task_info_pairee(issue_task):
     # customfield_12162 -> Pairee field
     try:
-        pair = issue_task.fields.customfield_12162.displayName
-        logging.warning(f"Paired: {issue_task.fields.customfield_12162.displayName} {issue_task.key}")
+        pair = issue_task.REPORT_FIELDS.customfield_12162.displayName
+        logging.warning(f"Paired: {issue_task.REPORT_FIELDS.customfield_12162.displayName} {issue_task.key}")
         return pair
     except:
         return False
@@ -81,12 +81,12 @@ def get_task_info(issue_task):
     :return:
     """
 
-    task_dict = {issue_task: {"task_issuetype": issue_task.fields.issuetype.name,
-                              "task_summary": issue_task.fields.summary,
-                              "task_time": issue_task.fields.aggregatetimespent,
-                              "task_update": issue_task.fields.updated[:10],
-                              "task_assignee": issue_task.fields.assignee,
-                              "task_resolutiondate": issue_task.fields.resolutiondate,
+    task_dict = {issue_task: {"task_issuetype": issue_task.REPORT_FIELDS.issuetype.name,
+                              "task_summary": issue_task.REPORT_FIELDS.summary,
+                              "task_time": issue_task.REPORT_FIELDS.aggregatetimespent,
+                              "task_update": issue_task.REPORT_FIELDS.updated[:10],
+                              "task_assignee": issue_task.REPORT_FIELDS.assignee,
+                              "task_resolutiondate": issue_task.REPORT_FIELDS.resolutiondate,
                               }
                 }
 
@@ -101,10 +101,10 @@ def time_calculation_person_pairee(pair, task_person_dict, issue_task):
     :return:
     """
     task_assignee = pair
-    task_time = issue_task.fields.aggregatetimespent
+    task_time = issue_task.REPORT_FIELDS.aggregatetimespent
 
     try:
-        task_person_dict[task_assignee] = task_person_dict[task_assignee] + issue_task.fields.aggregatetimespent
+        task_person_dict[task_assignee] = task_person_dict[task_assignee] + issue_task.REPORT_FIELDS.aggregatetimespent
     except:
         task_person_dict[task_assignee] = task_time
 
@@ -118,11 +118,11 @@ def time_calculation_person(task_person_dict, issue_task):
     :param issue_task:
     :return:
     """
-    task_assignee = str(issue_task.fields.assignee)
-    task_time = issue_task.fields.aggregatetimespent
+    task_assignee = str(issue_task.REPORT_FIELDS.assignee)
+    task_time = issue_task.REPORT_FIELDS.aggregatetimespent
 
     try:
-        task_person_dict[task_assignee] = task_person_dict[task_assignee] + issue_task.fields.aggregatetimespent
+        task_person_dict[task_assignee] = task_person_dict[task_assignee] + issue_task.REPORT_FIELDS.aggregatetimespent
     except:
         task_person_dict[task_assignee] = task_time
 
@@ -138,31 +138,31 @@ def get_epic_information(epic_dict, issue_epic, project_dict):
     :return:
     """
     key = issue_epic.key
-    issue_type = issue_epic.fields.issuetype.name
-    summary = issue_epic.fields.summary
-    reporter = issue_epic.fields.reporter.displayName
-    status = issue_epic.fields.status.name
-    created = issue_epic.fields.created[:10]
-    updated = issue_epic.fields.updated[:10]
-    category = issue_epic.fields.project.projectCategory.description  # name or description
+    issue_type = issue_epic.REPORT_FIELDS.issuetype.name
+    summary = issue_epic.REPORT_FIELDS.summary
+    reporter = issue_epic.REPORT_FIELDS.reporter.displayName
+    status = issue_epic.REPORT_FIELDS.status.name
+    created = issue_epic.REPORT_FIELDS.created[:10]
+    updated = issue_epic.REPORT_FIELDS.updated[:10]
+    category = issue_epic.REPORT_FIELDS.project.projectCategory.description  # name or description
 
     if project_dict["project_lead"] is None:
-        project_dict["project_lead"] = get_project_lead(issue_epic.fields.project.key)
+        project_dict["project_lead"] = get_project_lead(issue_epic.REPORT_FIELDS.project.key)
 
     # analyse resolved field
     try:
-        resolved = issue_epic.fields.resolutiondate[:10]
+        resolved = issue_epic.REPORT_FIELDS.resolutiondate[:10]
     except:
         resolved = 'None'
-    project_name = issue_epic.fields.project.name
+    project_name = issue_epic.REPORT_FIELDS.project.name
 
     # Prepare benefit string adding "commas" between benefits
     benefit = ''
     try:
         # Field: customfield_12221 -> Future Economic Benefit
-        for idx, b in enumerate(issue_epic.fields.customfield_12221):
+        for idx, b in enumerate(issue_epic.REPORT_FIELDS.customfield_12221):
             benefit += b.value
-            if idx < len(issue_epic.fields.customfield_12221) - 1:
+            if idx < len(issue_epic.REPORT_FIELDS.customfield_12221) - 1:
                 benefit += ", "
     except:
         benefit = "None"
