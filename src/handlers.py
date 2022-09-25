@@ -46,31 +46,6 @@ class ScreenOutputHandler(OutputHandler):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-    # def build(self, grouped_epics: Dict[str, List[ReportedEpic]]) -> None:
-    #     self._logger.info('Building Table to Print on the Screen')
-    #     self._report_table.field_names = REPORT_FIELDS
-    #     self._detailed_report_table.field_names = DETAILED_REPORT_FIELDS
-    #     for assignee, epics in grouped_epics.items():
-    #         for epic in epics:
-    #             self._logger.debug('Adding Row for Epic to Table')
-    #             self._report_table.add_row([
-    #                 assignee,
-    #                 epic.key,
-    #                 epic.summary,
-    #                 ','.join(epic.benefit),
-    #                 epic.time_spent()
-    #             ])
-    #             for task in epic.tasks:
-    #                 self._detailed_report_table.add_row([
-    #                     assignee,
-    #                     epic.key,
-    #                     task.key,
-    #                     task.summary,
-    #                     task.days_spent(),
-    #                     task.updated,
-    #                     task.resolved
-    #                 ])
-
     def output(self) -> None:
         self._logger.info('Printing reports on the screen')
         report_table = PrettyTable()
