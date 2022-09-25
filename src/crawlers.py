@@ -1,8 +1,8 @@
 import collections
 import datetime
 
-from entities import JiraEpic, JiraTask
-from typing import Any, Optional, List, Dict
+from src.entities import JiraEpic, JiraTask
+from typing import Optional, List
 from src.clients import JiraClient, Project
 from src.utils import CustomLogger
 from src.exceptions import ProjectNotFound
@@ -14,18 +14,10 @@ class ProjectCrawler:
         self._logger = logger()
         self._project: Optional[Project] = None
 
-    def group_tasks_by_assignee(self, tasks: List[JiraTask]) -> Dict[str, List[JiraTask]]:
-        self._logger.info('Grouping Tasks by Asignee')
-        grouped_tasks = collections.defaultdict(list)
-        for task in tasks:
-            if task.issue_type == 'Task':
-                grouped_tasks[task.assignee].append(task)
-        return grouped_tasks
-
     def get_project_lead(self) -> str:
         return self._project.lead.displayName
 
-    def crawl_report(self, project_key: str, start_date: datetime.date, end_date: datetime.date) -> Optional[Any]:
+    def crawl_tasks(self, project_key: str, start_date: datetime.date, end_date: datetime.date) -> List[JiraTask]:
         self._logger.info('Crawling Report')
         try:
             self._project = self._jira_client.get_project(project_key=project_key)
@@ -43,8 +35,4 @@ class ProjectCrawler:
                 epic=epic
             )
             tasks.extend(task)
-
-        # TODO this function might be outside the crawler
-        grouped_tasks = self.group_tasks_by_assignee(tasks=tasks)
-        # TODO: Need to finalise the total per epic/assignee
-        pass
+        return tasks
