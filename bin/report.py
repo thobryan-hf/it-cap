@@ -12,11 +12,13 @@ def main(project_key: str,
          start_date: datetime.date,
          end_date: datetime.date,
          output_format: str,
+         story_points: bool,
          report_manager: ReportManager = Provide[Container.report_manager]) -> None:
     report_manager.get_report(project_key=project_key,
                               start_date=start_date,
                               end_date=end_date,
-                              output_format=output_format)
+                              output_format=output_format,
+                              story_points=story_points)
 
 
 def run() -> None:
@@ -35,12 +37,22 @@ def run() -> None:
                         type=str.lower,
                         dest='output_format',
                         default='screen',
-                        choices=['screen', 'csv'])
+                        choices=['screen', 'csv'],
+                        help='Output format of the report')
+    parser.add_argument('--story-points',
+                        dest='story_points',
+                        action='store_true',
+                        default=False,
+                        help='Use story points instead of spent time')
     args = parser.parse_args()
     container = Container()
     container.wire(modules=[__name__])
     start_date, end_date = args.period
-    main(project_key=args.project_key, start_date=start_date, end_date=end_date, output_format=args.output_format)
+    main(project_key=args.project_key,
+         start_date=start_date,
+         end_date=end_date,
+         output_format=args.output_format,
+         story_points=args.story_points)
 
 
 if __name__ == "__main__":

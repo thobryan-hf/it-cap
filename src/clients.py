@@ -55,7 +55,7 @@ class JiraClient(JIRA):
     def get_capitalizable_epics(self, project_key: str) -> List[JiraEpic]:
         self._logger.info('Fetching Capitalizable Epics')
         jql_str = f'PROJECT IN ({project_key}) AND ISSUETYPE = "Epic" AND "Is Capitalizable?" = "Yes"'
-        epics = [self.extract_raw_epic(issue=issue) for issue in self.search_issues(jql_str=jql_str)]
+        epics = [self.extract_raw_epic(issue=issue) for issue in self.search_issues(jql_str=jql_str, maxResults=False)]
         self._logger.info(f'Found {len(epics)} epics under {project_key}')
         return epics
 
@@ -65,7 +65,8 @@ class JiraClient(JIRA):
             key=issue.key,
             summary=issue.fields.summary,
             issue_type=issue.fields.issuetype.name,
-            time_spent=issue.fields.aggregatetimespent,  # TODO Add calculation using Story Points too
+            time_spent=issue.fields.aggregatetimespent,
+            story_points=issue.fields.customfield_10005,
             assignee=str(issue.fields.assignee),
             updated=pendulum.parse(issue.fields.updated),
             resolved=pendulum.parse(issue.fields.resolutiondate) if issue.fields.resolutiondate else None,
@@ -83,6 +84,7 @@ class JiraClient(JIRA):
             f'AND resolved >= "{start_date}" '
             f'AND resolved <= "{end_date}"'
         )
-        tasks = [self.extract_raw_task(issue=issue, epic=epic) for issue in self.search_issues(jql_str=jql_str)]
+        tasks = [self.extract_raw_task(issue=issue, epic=epic)
+                 for issue in self.search_issues(jql_str=jql_str, maxResults=False)]
         self._logger.info(f'Found {len(tasks)} tasks under {epic.key}')
         return tasks

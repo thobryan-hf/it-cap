@@ -7,15 +7,17 @@ from typing import Dict, List
 
 from src.entities import ReportedEpic
 
-REPORT_FIELDS = ['Assignee', 'Epic Key', 'Epic Name', 'Benefit', 'Total Time Spent']
-DETAILED_REPORT_FIELDS = ['Assignee', 'Epic Key', 'Task Key', 'Task Name', 'Time Spent', 'Updated', 'Resolved']
+REPORT_FIELDS = ['Assignee', 'Epic Key', 'Epic Name', 'Benefit', 'Days Spent']
+DETAILED_REPORT_FIELDS = ['Assignee', 'Epic Key', 'Task Key', 'Task Type', 'Task Name', 'Days Spent', 'Updated',
+                          'Resolved']
 
 
 class OutputHandler:
-    def __init__(self, grouped_epics: Dict[str, List[ReportedEpic]], logger: CustomLogger) -> None:
+    def __init__(self, grouped_epics: Dict[str, List[ReportedEpic]], story_points: bool, logger: CustomLogger) -> None:
         self._report_rows: List[List[str]] = [REPORT_FIELDS]
         self._detailed_report_rows: List[List[str]] = [DETAILED_REPORT_FIELDS]
         self._grouped_epics = grouped_epics
+        self._story_points = story_points
         self._logger = logger()
 
     def build(self) -> None:
@@ -28,15 +30,16 @@ class OutputHandler:
                     epic.key,
                     epic.summary,
                     ','.join(epic.benefit),
-                    epic.time_spent()
+                    epic.story_points() if self._story_points else epic.time_spent()
                 ])
                 for task in epic.tasks:
                     self._detailed_report_rows.append([
                         assignee,
                         epic.key,
                         task.key,
+                        task.issue_type,
                         task.summary,
-                        task.days_spent(),
+                        task.story_points if self._story_points else task.days_spent(),
                         task.updated,
                         task.resolved
                     ])

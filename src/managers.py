@@ -26,7 +26,7 @@ class ReportManager:
         self._logger.info('Grouping Tasks by Assignee')
         grouped_tasks = collections.defaultdict(list)
         for task in tasks:
-            if task.issue_type == 'Task':
+            if task.issue_type in ['Task', 'Story']:
                 grouped_tasks[task.assignee].append(task)
         return grouped_tasks
 
@@ -49,20 +49,25 @@ class ReportManager:
                         resolved=task.epic.resolved,
                         tasks=[task]
                     )
-            grouped_epics[assignee].extend(sorted(epics_by_key.values(), key=lambda e: e.time_spent(), reverse=True))
+            sorted_epics = sorted(epics_by_key.values(),
+                                  key=lambda e: (e.time_spent(), e.story_points()),
+                                  reverse=True)
+            grouped_epics[assignee].extend(sorted_epics)
         return grouped_epics
 
     def get_report(self,
                    project_key: str,
                    start_date: datetime.date,
                    end_date: datetime.date,
-                   output_format: str) -> None:
+                   output_format: str,
+                   story_points: bool) -> None:
         tasks = self._project_crawler.crawl_tasks(project_key=project_key, start_date=start_date, end_date=end_date)
 
         grouped_tasks = self.group_tasks_by_assignee(tasks=tasks)
         grouped_epics = self.group_epics_by_assignee(grouped_tasks=grouped_tasks)
 
-        handler = getattr(self, f'_{output_format}_output_handler_factory')(grouped_epics=grouped_epics)
+        handler = getattr(self, f'_{output_format}_output_handler_factory')(grouped_epics=grouped_epics,
+                                                                            story_points=story_points)
 
         handler.build()
         handler.output()
