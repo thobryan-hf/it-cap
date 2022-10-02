@@ -1,0 +1,10 @@
+jira:
+  token: ${JIRA_TOKEN}
+  email: ${JIRA_EMAIL}
+  server: ${JIRA_SERVER:https://hellofresh.atlassian.net}
+
+logging:
+  formatter: ${LOGGING_FORMATTER:plain}
+  handler: ${LOGGING_HANDLER:console}
+  level: ${LOGGING_LEVEL:INFO}
+  log_path: ${LOGGING_SERVICE_PATH:/tmp/service.log}
